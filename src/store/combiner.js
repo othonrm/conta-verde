@@ -1,12 +1,10 @@
 // Reducers and Initial state
-import { episodesReducer, INITIAL_STATE as EpisodesInitialState } from './ducks/episodes';
-import { favoritesReducer, INITIAL_STATE as FavouritesInitialState } from './ducks/favourites';
+import { transacoesReducer, INITIAL_STATE as TransacoesInitialState } from './ducks/transacoes';
 
 export function combinedReducers(state, action) {
 
     return combine(state, action, [
-        episodesReducer,
-        favoritesReducer
+        transacoesReducer
     ]);
 }
 
@@ -30,6 +28,5 @@ function combine(state, action, reducers) {
 
 
 export const COMBINED_INITIAL_STATE = { 
-    ...EpisodesInitialState,
-    ...FavouritesInitialState
+    ...TransacoesInitialState
 };

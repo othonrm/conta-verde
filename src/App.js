@@ -35,11 +35,19 @@ import { ExpandMore } from '@material-ui/icons';
 
 import useStyles from './styles';
 
-export default function App() {
+import { useStore } from './store';
+
+import { Creators as TransacoesActions} from './store/ducks/transacoes';
+
+export default function App(props) {
+
+    // Map state to props
+    props = {...props, ...useStore().state, ...TransacoesActions };
+
+    // Declare dispatch
+    TransacoesActions.dispatch = useStore().dispatch;
 
     const classes = useStyles();
-
-    const [transacoes, setTransacoes] = useState(JSON.parse(localStorage.getItem('transacoes')) || []);
 
     const [showReceitas, setShowReceitas] = useState(false);
     const [showDespesas, setShowDespesas] = useState(false);
@@ -55,10 +63,10 @@ export default function App() {
 
     useEffect(() => {
         
-        localStorage.setItem('transacoes', JSON.stringify(transacoes));
+        localStorage.setItem('transacoes', JSON.stringify(props.transacoes));
 
-        let totalReceitas = transacoes.filter(transacao => transacao.tipo === 'receita').reduce((accumuled, current) => accumuled + parseFloat(current.valor), 0);
-        let totalDespesas = transacoes.filter(transacao => transacao.tipo === 'despesa').reduce((accumuled, current) => accumuled + parseFloat(current.valor), 0);
+        let totalReceitas = props.transacoes.filter(transacao => transacao.tipo === 'receita').reduce((accumuled, current) => accumuled + parseFloat(current.valor), 0);
+        let totalDespesas = props.transacoes.filter(transacao => transacao.tipo === 'despesa').reduce((accumuled, current) => accumuled + parseFloat(current.valor), 0);
 
         let saldoAtual = totalReceitas - totalDespesas
 
@@ -69,12 +77,12 @@ export default function App() {
             saldoAtual
         }));
         
-    }, [transacoes]);
+    }, [props.transacoes]);
 
     function handleFormSubmit(e) {
 
-        e.preventDefault();        
-        
+        e.preventDefault();
+                
         let novaTransacao = {
             titulo: e.target.titulo.value,
             valor: parseFloat(e.target.valor.value),
@@ -87,18 +95,18 @@ export default function App() {
         {
             return;
         }
-        
-        setTransacoes([ ...transacoes, novaTransacao]);
+
+        props.addNovaTransacao(novaTransacao);
 
         setShowReceitas(true);
     }
 
     const handleChange = event => {
         setValues(oldValues => ({
-          ...oldValues,
-          [event.target.name]: event.target.value,
+            ...oldValues,
+            [event.target.name]: event.target.value,
         }));
-      };
+    };
     
 
     return (
@@ -188,14 +196,14 @@ export default function App() {
                         Receitas
                     </Typography>
                     <Typography style={{ marginLeft: 'auto' }}>
-                        R$ {transacoes.filter(transacao => transacao.tipo === 'receita').reduce((accumuled, current) => accumuled + parseFloat(current.valor), 0)}
+                        R$ {values.totalReceitas}
                     </Typography>
                 </ExpansionPanelSummary>
 
                 <ExpansionPanelDetails>                
                     <List className={classes.lista}>
                         {
-                            transacoes.filter(transacao => transacao.tipo === 'receita').map((transacao, index) => {
+                            props.transacoes.filter(transacao => transacao.tipo === 'receita').map((transacao, index) => {
                                 return (
                                     <ListItem className="list-item" key={index} role={undefined} dense>
                                         <ListItemText primary={`${transacao.titulo}`} />
@@ -219,14 +227,14 @@ export default function App() {
                         Despesas
                     </Typography>
                     <Typography style={{ marginLeft: 'auto' }}>
-                        R$ {transacoes.filter(transacao => transacao.tipo === 'despesa').reduce((accumuled, current) => accumuled + parseFloat(current.valor), 0)}
+                        R$ {values.totalDespesas}
                     </Typography>
                 </ExpansionPanelSummary>
 
                 <ExpansionPanelDetails>                
                     <List className={classes.lista}>
                         {
-                            transacoes.filter(transacao => transacao.tipo === 'despesa').map((transacao, index) => {
+                            props.transacoes.filter(transacao => transacao.tipo === 'despesa').map((transacao, index) => {
                                 return (
                                     <ListItem className="list-item" key={index} role={undefined} dense>
                                         <ListItemText primary={`${transacao.titulo}`} />

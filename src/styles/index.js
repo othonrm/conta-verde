@@ -8,6 +8,7 @@ const useStyles = makeStyles({
 
     lista: {
         width: '100%',
+        marginBottom: 20,
     },
 
     form: {
